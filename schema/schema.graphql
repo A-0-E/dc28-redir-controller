@@ -9,24 +9,38 @@ type Mutation {
 }
 
 type Subscription {
+  team: [Team!]!
+  service: [Service!]!
   serviceStateChanged: ServiceState!
 }
 
 type Team {
   name: String!
   ip: String!
+  """
+  updatedAt to prevent data race between subscription and query
+  """
+  updatedAt: Int!
 }
 
 type Service {
   name: String!
   normalPort: Int!
   stealthPort: Int!
+  """
+  updatedAt to prevent data race between subscription and query
+  """
+  updatedAt: Int!
 }
 
 type ServiceState {
   team: Team!
   service: Service!
   state: State!
+  """
+  updatedAt to prevent data race between subscription and query
+  """
+  updatedAt: Int!
 }
 
 enum State {
