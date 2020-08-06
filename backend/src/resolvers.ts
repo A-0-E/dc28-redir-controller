@@ -12,6 +12,9 @@ export const resolvers: Resolvers<Context> = {
   Query: {
     config(parent, args, { getConfig }) {
       return getConfig()
+    },
+    allState() {
+      return []
     }
   },
   Subscription: {
