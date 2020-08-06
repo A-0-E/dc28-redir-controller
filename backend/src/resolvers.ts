@@ -1,21 +1,33 @@
-import { Resolvers } from './generated/graphql'
+import { Resolvers, Config } from './generated/graphql'
 import { PubSub } from 'apollo-server'
+import { SubscriptionType } from './messages'
 
-enum SubscriptionType {
-  ServiceStateChanged = 'ServiceStateChanged',
-}
 
 export interface Context {
   pubsub: PubSub,
+  getConfig: () => Config,
 }
 
 export const resolvers: Resolvers<Context> = {
   Query: {
+    config(parent, args, { getConfig }) {
+      return getConfig()
+    }
   },
   Subscription: {
     serviceStateChanged: {
-      subscribe (parent, args, { pubsub }) {
+      subscribe(parent, args, { pubsub }) {
         return pubsub.asyncIterator(SubscriptionType.ServiceStateChanged)
+      }
+    },
+    config: {
+      subscribe(parent, args, { pubsub }) {
+        return pubsub.asyncIterator(SubscriptionType.Config)
+      }
+    },
+    forceReload: {
+      subscribe(parent, args, { pubsub }) {
+        return pubsub.asyncIterator(SubscriptionType.ForceReload)
       }
     }
   }

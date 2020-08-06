@@ -19,7 +19,7 @@ type Config {
   """
   updatedAt to prevent data race between subscription and query
   """
-  updatedAt: Int!
+  updatedAt: Date!
 }
 
 type Team {
@@ -40,7 +40,7 @@ type ServiceState {
   """
   updatedAt to prevent data race between subscription and query
   """
-  updatedAt: Int!
+  updatedAt: Date!
 }
 
 enum State {
@@ -48,3 +48,5 @@ enum State {
   Normal
   Stealth
 }
+
+scalar Date

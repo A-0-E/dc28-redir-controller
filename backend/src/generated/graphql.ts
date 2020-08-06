@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type RequireFields<T, K extends keyof T> = { [X in Exclude<keyof T, K>]?: T[X] } & { [P in K]-?: NonNullable<T[P]> };
@@ -9,12 +9,12 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Date: any;
 };
 
 export type Query = {
   __typename?: 'Query';
-  team: Array<Team>;
-  service: Array<Service>;
+  config: Config;
   allState: Array<ServiceState>;
 };
 
@@ -32,17 +32,23 @@ export type MutationSetServiceStateArgs = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  config: Config;
+  serviceStateChanged: ServiceState;
+  forceReload: Scalars['Boolean'];
+};
+
+export type Config = {
+  __typename?: 'Config';
   team: Array<Team>;
   service: Array<Service>;
-  serviceStateChanged: ServiceState;
+  /** updatedAt to prevent data race between subscription and query */
+  updatedAt: Scalars['Date'];
 };
 
 export type Team = {
   __typename?: 'Team';
   name: Scalars['String'];
   ip: Scalars['String'];
-  /** updatedAt to prevent data race between subscription and query */
-  updatedAt: Scalars['Int'];
 };
 
 export type Service = {
@@ -50,8 +56,6 @@ export type Service = {
   name: Scalars['String'];
   normalPort: Scalars['Int'];
   stealthPort: Scalars['Int'];
-  /** updatedAt to prevent data race between subscription and query */
-  updatedAt: Scalars['Int'];
 };
 
 export type ServiceState = {
@@ -60,7 +64,7 @@ export type ServiceState = {
   service: Service;
   state: State;
   /** updatedAt to prevent data race between subscription and query */
-  updatedAt: Scalars['Int'];
+  updatedAt: Scalars['Date'];
 };
 
 export enum State {
@@ -68,6 +72,7 @@ export enum State {
   Normal = 'Normal',
   Stealth = 'Stealth'
 }
+
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
@@ -152,12 +157,14 @@ export type ResolversTypes = ResolversObject<{
   Mutation: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Subscription: ResolverTypeWrapper<{}>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  Config: ResolverTypeWrapper<Config>;
   Team: ResolverTypeWrapper<Team>;
-  Int: ResolverTypeWrapper<Scalars['Int']>;
   Service: ResolverTypeWrapper<Service>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
   ServiceState: ResolverTypeWrapper<ServiceState>;
   State: State;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  Date: ResolverTypeWrapper<Scalars['Date']>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -166,16 +173,17 @@ export type ResolversParentTypes = ResolversObject<{
   Mutation: {};
   String: Scalars['String'];
   Subscription: {};
-  Team: Team;
-  Int: Scalars['Int'];
-  Service: Service;
-  ServiceState: ServiceState;
   Boolean: Scalars['Boolean'];
+  Config: Config;
+  Team: Team;
+  Service: Service;
+  Int: Scalars['Int'];
+  ServiceState: ServiceState;
+  Date: Scalars['Date'];
 }>;
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  team?: Resolver<Array<ResolversTypes['Team']>, ParentType, ContextType>;
-  service?: Resolver<Array<ResolversTypes['Service']>, ParentType, ContextType>;
+  config?: Resolver<ResolversTypes['Config'], ParentType, ContextType>;
   allState?: Resolver<Array<ResolversTypes['ServiceState']>, ParentType, ContextType>;
 }>;
 
@@ -184,15 +192,21 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 }>;
 
 export type SubscriptionResolvers<ContextType = any, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = ResolversObject<{
-  team?: SubscriptionResolver<Array<ResolversTypes['Team']>, "team", ParentType, ContextType>;
-  service?: SubscriptionResolver<Array<ResolversTypes['Service']>, "service", ParentType, ContextType>;
+  config?: SubscriptionResolver<ResolversTypes['Config'], "config", ParentType, ContextType>;
   serviceStateChanged?: SubscriptionResolver<ResolversTypes['ServiceState'], "serviceStateChanged", ParentType, ContextType>;
+  forceReload?: SubscriptionResolver<ResolversTypes['Boolean'], "forceReload", ParentType, ContextType>;
+}>;
+
+export type ConfigResolvers<ContextType = any, ParentType extends ResolversParentTypes['Config'] = ResolversParentTypes['Config']> = ResolversObject<{
+  team?: Resolver<Array<ResolversTypes['Team']>, ParentType, ContextType>;
+  service?: Resolver<Array<ResolversTypes['Service']>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
 export type TeamResolvers<ContextType = any, ParentType extends ResolversParentTypes['Team'] = ResolversParentTypes['Team']> = ResolversObject<{
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   ip?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -200,7 +214,6 @@ export type ServiceResolvers<ContextType = any, ParentType extends ResolversPare
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   normalPort?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   stealthPort?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
 
@@ -208,17 +221,23 @@ export type ServiceStateResolvers<ContextType = any, ParentType extends Resolver
   team?: Resolver<ResolversTypes['Team'], ParentType, ContextType>;
   service?: Resolver<ResolversTypes['Service'], ParentType, ContextType>;
   state?: Resolver<ResolversTypes['State'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType>;
 }>;
+
+export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
+  name: 'Date';
+}
 
 export type Resolvers<ContextType = any> = ResolversObject<{
   Query?: QueryResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
+  Config?: ConfigResolvers<ContextType>;
   Team?: TeamResolvers<ContextType>;
   Service?: ServiceResolvers<ContextType>;
   ServiceState?: ServiceStateResolvers<ContextType>;
+  Date?: GraphQLScalarType;
 }>;
 
 

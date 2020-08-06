@@ -1,0 +1,13 @@
+team:
+  - name: ppp
+    ip: 1.1.1.1
+  - name: ppp
+    ip: 1.1.1.2
+service:
+  - name: pwn1
+    normalPort: 3389
+    stealthPort: 13389
+  - name: pwn100
+    normalPort: 4000
+  - name: pwn202
+    normalPort: 8000
