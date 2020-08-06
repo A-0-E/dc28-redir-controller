@@ -22,8 +22,14 @@ enum fwAction {
     DEL,
 };
 
+let needSudo: boolean = ((process?.env?.["NEED_SUDO"]?.length || 0) > 0) || false
+
 async function executeIPTables(args: string[]) {
-    return await exec(sudo_path, [iptables_path, ...args])
+    if (needSudo) {
+        return await exec(sudo_path, [iptables_path, ...args])
+    } else {
+        return await exec(iptables_path, args)
+    }
 }
 
 async function getAllRules() {
