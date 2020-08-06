@@ -1,6 +1,5 @@
 type Query {
-  team: [Team!]!
-  service: [Service!]!
+  config: Config!
   allState: [ServiceState!]!
 }
 
@@ -9,28 +8,28 @@ type Mutation {
 }
 
 type Subscription {
+  config: Config!
+  serviceStateChanged: ServiceState!
+}
+
+type Config {
   team: [Team!]!
   service: [Service!]!
-  serviceStateChanged: ServiceState!
+  """
+  updatedAt to prevent data race between subscription and query
+  """
+  updatedAt: Int!
 }
 
 type Team {
   name: String!
   ip: String!
-  """
-  updatedAt to prevent data race between subscription and query
-  """
-  updatedAt: Int!
 }
 
 type Service {
   name: String!
   normalPort: Int!
   stealthPort: Int!
-  """
-  updatedAt to prevent data race between subscription and query
-  """
-  updatedAt: Int!
 }
 
 type ServiceState {
