@@ -1,4 +1,4 @@
-query Query {
+query Init {
   team {
     name
     ip
@@ -11,6 +11,10 @@ query Query {
   allState {
     ...ServiceState
   }
+}
+
+subscription SubscriptionTeam {
+
 }
 
 fragment ServiceState on ServiceState {

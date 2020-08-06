@@ -26,9 +26,34 @@ const splitLink = split(
   httpLink,
 )
 
+type UpdatedAt = { updatedAt: number }
+const MergeByUpdatedAt = {
+  fields: {
+    updatedAt: {
+      merge(existing: UpdatedAt, incoming: UpdatedAt) {
+        return existing.updatedAt < incoming.updatedAt ? incoming : existing
+      }
+    }
+  }
+}
+
 const client = new ApolloClient({
   uri: '/',
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Team: {
+        keyFields: ['name'],
+        ...MergeByUpdatedAt,
+      },
+      Service: {
+        keyFields: ['name'],
+        ...MergeByUpdatedAt,
+      },
+      ServiceState: {
+        ...MergeByUpdatedAt,
+      }
+    }
+  }),
   link: splitLink,
 })
 

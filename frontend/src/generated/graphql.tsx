@@ -70,10 +70,10 @@ export enum State {
   Stealth = 'Stealth'
 }
 
-export type QueryQueryVariables = Exact<{ [key: string]: never; }>;
+export type InitQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type QueryQuery = (
+export type InitQuery = (
   { __typename?: 'Query' }
   & { team: Array<(
     { __typename?: 'Team' }
@@ -125,8 +125,8 @@ export const ServiceStateFragmentDoc = gql`
   state
 }
     `;
-export const QueryDocument = gql`
-    query Query {
+export const InitDocument = gql`
+    query Init {
   team {
     name
     ip
@@ -143,29 +143,29 @@ export const QueryDocument = gql`
     ${ServiceStateFragmentDoc}`;
 
 /**
- * __useQueryQuery__
+ * __useInitQuery__
  *
- * To run a query within a React component, call `useQueryQuery` and pass it any options that fit your needs.
- * When your component renders, `useQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useInitQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInitQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useQueryQuery({
+ * const { data, loading, error } = useInitQuery({
  *   variables: {
  *   },
  * });
  */
-export function useQueryQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<QueryQuery, QueryQueryVariables>) {
-        return ApolloReactHooks.useQuery<QueryQuery, QueryQueryVariables>(QueryDocument, baseOptions);
+export function useInitQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<InitQuery, InitQueryVariables>) {
+        return ApolloReactHooks.useQuery<InitQuery, InitQueryVariables>(InitDocument, baseOptions);
       }
-export function useQueryLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<QueryQuery, QueryQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<QueryQuery, QueryQueryVariables>(QueryDocument, baseOptions);
+export function useInitLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<InitQuery, InitQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<InitQuery, InitQueryVariables>(InitDocument, baseOptions);
         }
-export type QueryQueryHookResult = ReturnType<typeof useQueryQuery>;
-export type QueryLazyQueryHookResult = ReturnType<typeof useQueryLazyQuery>;
-export type QueryQueryResult = ApolloReactCommon.QueryResult<QueryQuery, QueryQueryVariables>;
+export type InitQueryHookResult = ReturnType<typeof useInitQuery>;
+export type InitLazyQueryHookResult = ReturnType<typeof useInitLazyQuery>;
+export type InitQueryResult = ApolloReactCommon.QueryResult<InitQuery, InitQueryVariables>;
 export const SetServiceStateDocument = gql`
     mutation SetServiceState($teamName: String, $serviceName: String!, $state: State!) {
   setServiceState(teamName: $teamName, serviceName: $serviceName, state: $state) {
