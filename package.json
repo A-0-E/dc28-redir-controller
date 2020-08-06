@@ -1,0 +1,29 @@
+{
+  "name": "dc28-redir-controller",
+  "version": "1.0.0",
+  "description": "DC28 Redirection Controller (RC)",
+  "main": "index.js",
+  "scripts": {
+    "gen": "graphql-codegen --config .codegen.yml",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teamA0E/dc28-redir-controller.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/teamA0E/dc28-redir-controller/issues"
+  },
+  "homepage": "https://github.com/teamA0E/dc28-redir-controller#readme",
+  "dependencies": {
+    "@graphql-codegen/cli": "^1.17.6",
+    "@graphql-codegen/fragment-matcher": "^1.17.3",
+    "@graphql-codegen/typescript": "^1.17.6",
+    "@graphql-codegen/typescript-operations": "^1.17.6",
+    "@graphql-codegen/typescript-react-apollo": "^1.17.3",
+    "graphql": "^15.3.0"
+  }
+}

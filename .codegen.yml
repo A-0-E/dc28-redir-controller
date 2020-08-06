@@ -1,10 +1,10 @@
 overwrite: true
 schema:
-  - "../schema/schema.graphql"
+  - "schema/schema.graphql"
 documents:
-  - "../schema/query.graphql"
+  - "schema/query.graphql"
 generates:
-  src/generated/graphql.tsx:
+  frontend/src/generated/graphql.tsx:
     plugins:
       - "typescript"
       - "typescript-operations"
@@ -15,6 +15,6 @@ generates:
       withHooks: true
       apolloReactCommonImportFrom: "@apollo/client"
       apolloReactHooksImportFrom: "@apollo/client"
-  src/generated/fragmentTypes.json:
+  frontend/src/generated/fragmentTypes.json:
     plugins:
       - fragment-matcher
