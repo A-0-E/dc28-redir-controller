@@ -1,9 +1,11 @@
 type Query {
   team: [Team!]!
+  service: [Service!]!
+  allState: [ServiceState!]!
 }
 
 type Mutation {
-  setServiceState(teamName: String!, serviceName: String!, state: ServiceState!): Service
+  setServiceState(teamName: String, serviceName: String!, state: State!): [ServiceState!]
 }
 
 type Subscription {
@@ -13,19 +15,21 @@ type Subscription {
 type Team {
   name: String!
   ip: String!
-  service: [Service!]!
 }
 
 type Service {
-  team: Team!
-
   name: String!
   normalPort: Int!
   stealthPort: Int!
-  state: ServiceState!
 }
 
-enum ServiceState {
+type ServiceState {
+  team: Team!
+  service: Service!
+  state: State!
+}
+
+enum State {
   Ignore
   Normal
   Stealth
