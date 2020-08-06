@@ -41,13 +41,14 @@ const client = new ApolloClient({
   uri: '/',
   cache: new InMemoryCache({
     typePolicies: {
+      Config: {
+        ...MergeByUpdatedAt,
+      },
       Team: {
         keyFields: ['name'],
-        ...MergeByUpdatedAt,
       },
       Service: {
         keyFields: ['name'],
-        ...MergeByUpdatedAt,
       },
       ServiceState: {
         ...MergeByUpdatedAt,

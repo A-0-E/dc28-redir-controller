@@ -5,7 +5,7 @@ import { TransposeTable } from './components/TransposeTable'
 import { Checkbox } from 'antd'
 
 
-const ServiceTable: React.FC<InitQuery> = ({ team, service, allState }) => {
+const ServiceTable: React.FC<InitQuery> = ({ config: { team, service }, allState }) => {
   const [ transpose, setTranspose ] = useState(false)
   const data = allState.map(({ team, service, state }) => ({
     team: team.name,
