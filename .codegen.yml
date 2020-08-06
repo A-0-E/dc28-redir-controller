@@ -4,6 +4,14 @@ schema:
 documents:
   - "schema/query.graphql"
 generates:
+  backend/src/generated/graphql.ts:
+    documents: null
+    plugins:
+      - "typescript"
+      - "typescript-resolvers"
+    config:
+      # avoidOptionals: true
+      useIndexSignature: true
   frontend/src/generated/graphql.tsx:
     plugins:
       - "typescript"

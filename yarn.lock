@@ -561,6 +561,18 @@
     pascal-case "3.1.1"
     tslib "~2.0.0"
 
+"@graphql-codegen/typescript-resolvers@^1.17.7":
+  version "1.17.7"
+  resolved "https://registry.npm.taobao.org/@graphql-codegen/typescript-resolvers/download/@graphql-codegen/typescript-resolvers-1.17.7.tgz#fe912db2abeab36daf747108607d09bbc97b82fa"
+  integrity sha1-/pEtsqvqs22vdHEIYH0Ju8l7gvo=
+  dependencies:
+    "@graphql-codegen/plugin-helpers" "1.17.7"
+    "@graphql-codegen/typescript" "1.17.7"
+    "@graphql-codegen/visitor-plugin-common" "1.17.7"
+    "@graphql-tools/utils" "^6.0.0"
+    auto-bind "~4.0.0"
+    tslib "~2.0.0"
+
 "@graphql-codegen/typescript@1.17.7", "@graphql-codegen/typescript@^1.17.6":
   version "1.17.7"
   resolved "https://registry.npm.taobao.org/@graphql-codegen/typescript/download/@graphql-codegen/typescript-1.17.7.tgz#35d92da76d4e07b612ab1ac0bd9726fbaac1fb0d"

@@ -19,7 +19,6 @@ export type Query = {
 
 export type Team = {
   __typename?: 'Team';
-  id: Scalars['ID'];
   name: Scalars['String'];
 };
 
@@ -30,7 +29,7 @@ export type TeamQuery = (
   { __typename?: 'Query' }
   & { team: Array<(
     { __typename?: 'Team' }
-    & Pick<Team, 'id' | 'name'>
+    & Pick<Team, 'name'>
   )> }
 );
 
@@ -38,7 +37,6 @@ export type TeamQuery = (
 export const TeamDocument = gql`
     query Team {
   team {
-    id
     name
   }
 }

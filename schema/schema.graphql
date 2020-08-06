@@ -3,6 +3,5 @@ type Query {
 }
 
 type Team {
-  id: ID!
   name: String!
 }
