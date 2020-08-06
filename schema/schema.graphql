@@ -2,6 +2,31 @@ type Query {
   team: [Team!]!
 }
 
+type Mutation {
+  setServiceState(teamName: String!, serviceName: String!, state: ServiceState!): Service
+}
+
+type Subscription {
+  team: [Team!]!
+}
+
 type Team {
   name: String!
+  ip: String!
+  service: [Service!]!
+}
+
+type Service {
+  team: Team!
+
+  name: String!
+  normalPort: Int!
+  stealthPort: Int!
+  state: ServiceState!
+}
+
+enum ServiceState {
+  Ignore
+  Normal
+  Stealth
 }
