@@ -1,6 +1,8 @@
 import { Resolvers, Config } from './generated/graphql'
 import { PubSub } from 'apollo-server'
 import { SubscriptionType } from './messages'
+import { getAllStatus } from './native_cmds'
+import { getState, changeState } from './states'
 
 
 export interface Context {
@@ -14,7 +16,12 @@ export const resolvers: Resolvers<Context> = {
       return getConfig()
     },
     allState() {
-      return []
+      return getState()
+    }
+  },
+  Mutation: {
+    setServiceState(parent, args, { pubsub, getConfig }) {
+      return changeState(getConfig(), pubsub, args.state, args.serviceName, args.teamName)
     }
   },
   Subscription: {

@@ -4,6 +4,7 @@ import * as path from 'path'
 import { resolvers, Context } from './resolvers'
 
 import {getConfig, startWatch} from  './storage';
+import { watchState } from './states';
 
 async function main() {
   const schema = readFileSync(path.resolve(__dirname, '../../schema/schema.graphql')).toString()
@@ -22,6 +23,7 @@ async function main() {
 
   // Watch the config
   await startWatch("./config.example.yaml", pubsub)
+  await watchState(10, pubsub, getConfig)
 
   server.listen().then(({ url }) => {
     console.log(`🚀  Server ready at ${url}`);
