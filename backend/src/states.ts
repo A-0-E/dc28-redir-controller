@@ -45,15 +45,14 @@ export async function changeState(config: Config, pubsub: PubSub, newState: Stat
     for (let i = 0; i < teamList.length; i++) {
         let teamName = teamList[i]
         let newItem = newServiceStateItem(serviceName, teamName, newState, config)
-        serviceState = serviceState.filter(async (val) => {
+        serviceState = serviceState.filter((val) => {
             // 1. check current states to see existing configs
             let hit = jsonEqual(val.team, newItem.team) && jsonEqual(val.service, newItem.service)
             if (hit) {
                 // 2. remove previous settings from iptables and local storage, if any
                 let hitRule = serviceStateToRule(val);
                 if (hitRule) {
-                    console.log(`Deleted ${hitRule}`)
-                    await delForward(hitRule);
+                    delForward(hitRule).catch((e) => new Error(`Can not delete: ${e}`));
                 } else {
                     throw Error(`Found an improper state: ${val}`)
                 }
