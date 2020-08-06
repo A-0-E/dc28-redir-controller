@@ -111,6 +111,17 @@ export type SubscriptionConfigSubscription = (
   ) }
 );
 
+export type SubscriptionServiceStateSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscriptionServiceStateSubscription = (
+  { __typename?: 'Subscription' }
+  & { serviceStateChanged: (
+    { __typename?: 'ServiceState' }
+    & ServiceStateFragment
+  ) }
+);
+
 export type ServiceStateFragment = (
   { __typename?: 'ServiceState' }
   & Pick<ServiceState, 'state'>
@@ -226,6 +237,34 @@ export function useSubscriptionConfigSubscription(baseOptions?: ApolloReactHooks
       }
 export type SubscriptionConfigSubscriptionHookResult = ReturnType<typeof useSubscriptionConfigSubscription>;
 export type SubscriptionConfigSubscriptionResult = ApolloReactCommon.SubscriptionResult<SubscriptionConfigSubscription>;
+export const SubscriptionServiceStateDocument = gql`
+    subscription SubscriptionServiceState {
+  serviceStateChanged {
+    ...ServiceState
+  }
+}
+    ${ServiceStateFragmentDoc}`;
+
+/**
+ * __useSubscriptionServiceStateSubscription__
+ *
+ * To run a query within a React component, call `useSubscriptionServiceStateSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscriptionServiceStateSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscriptionServiceStateSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscriptionServiceStateSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<SubscriptionServiceStateSubscription, SubscriptionServiceStateSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<SubscriptionServiceStateSubscription, SubscriptionServiceStateSubscriptionVariables>(SubscriptionServiceStateDocument, baseOptions);
+      }
+export type SubscriptionServiceStateSubscriptionHookResult = ReturnType<typeof useSubscriptionServiceStateSubscription>;
+export type SubscriptionServiceStateSubscriptionResult = ApolloReactCommon.SubscriptionResult<SubscriptionServiceStateSubscription>;
 export const SetServiceStateDocument = gql`
     mutation SetServiceState($teamName: String, $serviceName: String!, $state: State!) {
   setServiceState(teamName: $teamName, serviceName: $serviceName, state: $state) {

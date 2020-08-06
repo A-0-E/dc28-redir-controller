@@ -25,6 +25,12 @@ subscription SubscriptionConfig {
   }
 }
 
+subscription SubscriptionServiceState {
+  serviceStateChanged {
+    ...ServiceState
+  }
+}
+
 fragment ServiceState on ServiceState {
   team {
     name

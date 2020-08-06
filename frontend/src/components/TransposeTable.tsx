@@ -18,7 +18,7 @@ export type TransposeTableProps = {
   x: Axis
   y: Axis
   data: Record<string, any>[]
-  render: (data?: any) => ReactNode
+  render: (data: any | undefined, x: string, y: string) => ReactNode
   transpose?: boolean
 }
 
@@ -58,14 +58,14 @@ export const TransposeTable: React.FC<TransposeTableProps> = ({
         _yName: i.title,
         ...fromEntries(x.header.map(({ id }) => {
           const node = data.find(v => v[x.fieldKey] === id && v[y.fieldKey] === i.id)
-          return [ id, render(node) ]
+          return [ id, render(node, id, i.id) ]
         }))
       }
     })
   }, [ data, x, y, render ])
 
   return <Table
-    rowKey={(_, i) => i!}
+    rowKey={({ _key }) => _key}
     columns={columns}
     dataSource={dataSource}
     pagination={false}

@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
-import { useInitQuery, InitQuery, State } from './generated/graphql'
+import { useInitQuery, InitQuery, State, useSubscriptionConfigSubscription, useSetServiceStateMutation } from './generated/graphql'
 import { Loading } from './components/Loading'
 import { TransposeTable } from './components/TransposeTable'
 import { Checkbox } from 'antd'
-
+import { StateSelect } from './components/StateSelect'
 
 const ServiceTable: React.FC<InitQuery> = ({ config: { team, service }, allState }) => {
+  useSubscriptionConfigSubscription()
+
+  const [ setServiceState, result ] = useSetServiceStateMutation()
   const [ transpose, setTranspose ] = useState(false)
   const data = allState.map(({ team, service, state }) => ({
     team: team.name,
@@ -14,7 +17,7 @@ const ServiceTable: React.FC<InitQuery> = ({ config: { team, service }, allState
   }))
 
   return <>
-    <Checkbox value={transpose} onChange={e => setTranspose(e.target.checked)}>Transpose</Checkbox>
+    <Checkbox checked={transpose} onChange={e => setTranspose(e.target.checked)}>Transpose</Checkbox>
     <TransposeTable
       transpose={transpose}
       x={{
@@ -33,8 +36,18 @@ const ServiceTable: React.FC<InitQuery> = ({ config: { team, service }, allState
           title: i.name,
         }))
       }}
-      render={(node?: typeof data[0]) => {
-        return node ? node.state : State.Ignore
+      render={(node: typeof data[0] | undefined, teamName, serviceName) => {
+        const state = node ? node.state : State.Ignore
+        return <StateSelect value={state} onChange={(state) => {
+          console.log(teamName, serviceName)
+          setServiceState({
+            variables: {
+              teamName,
+              serviceName,
+              state
+            }
+          })
+        }} />
       }}
       data={data}
     />
