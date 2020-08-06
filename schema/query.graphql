@@ -1,4 +1,4 @@
-query Init {
+fragment Config on Config {
   team {
     name
     ip
@@ -8,13 +8,21 @@ query Init {
     normalPort
     stealthPort
   }
+}
+
+query Init {
+  config {
+    ...Config
+  }
   allState {
     ...ServiceState
   }
 }
 
-subscription SubscriptionTeam {
-
+subscription SubscriptionConfig {
+  config {
+    ...Config
+  }
 }
 
 fragment ServiceState on ServiceState {

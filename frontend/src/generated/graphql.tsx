@@ -10,12 +10,12 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  Date: any;
 };
 
 export type Query = {
   __typename?: 'Query';
-  team: Array<Team>;
-  service: Array<Service>;
+  config: Config;
   allState: Array<ServiceState>;
 };
 
@@ -33,17 +33,23 @@ export type MutationSetServiceStateArgs = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  config: Config;
+  serviceStateChanged: ServiceState;
+  forceReload: Scalars['Boolean'];
+};
+
+export type Config = {
+  __typename?: 'Config';
   team: Array<Team>;
   service: Array<Service>;
-  serviceStateChanged: ServiceState;
+  /** updatedAt to prevent data race between subscription and query */
+  updatedAt: Scalars['Date'];
 };
 
 export type Team = {
   __typename?: 'Team';
   name: Scalars['String'];
   ip: Scalars['String'];
-  /** updatedAt to prevent data race between subscription and query */
-  updatedAt: Scalars['Int'];
 };
 
 export type Service = {
@@ -51,8 +57,6 @@ export type Service = {
   name: Scalars['String'];
   normalPort: Scalars['Int'];
   stealthPort: Scalars['Int'];
-  /** updatedAt to prevent data race between subscription and query */
-  updatedAt: Scalars['Int'];
 };
 
 export type ServiceState = {
@@ -61,7 +65,7 @@ export type ServiceState = {
   service: Service;
   state: State;
   /** updatedAt to prevent data race between subscription and query */
-  updatedAt: Scalars['Int'];
+  updatedAt: Scalars['Date'];
 };
 
 export enum State {
@@ -70,21 +74,41 @@ export enum State {
   Stealth = 'Stealth'
 }
 
-export type InitQueryVariables = Exact<{ [key: string]: never; }>;
 
-
-export type InitQuery = (
-  { __typename?: 'Query' }
+export type ConfigFragment = (
+  { __typename?: 'Config' }
   & { team: Array<(
     { __typename?: 'Team' }
     & Pick<Team, 'name' | 'ip'>
   )>, service: Array<(
     { __typename?: 'Service' }
     & Pick<Service, 'name' | 'normalPort' | 'stealthPort'>
-  )>, allState: Array<(
+  )> }
+);
+
+export type InitQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type InitQuery = (
+  { __typename?: 'Query' }
+  & { config: (
+    { __typename?: 'Config' }
+    & ConfigFragment
+  ), allState: Array<(
     { __typename?: 'ServiceState' }
     & ServiceStateFragment
   )> }
+);
+
+export type SubscriptionConfigSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscriptionConfigSubscription = (
+  { __typename?: 'Subscription' }
+  & { config: (
+    { __typename?: 'Config' }
+    & ConfigFragment
+  ) }
 );
 
 export type ServiceStateFragment = (
@@ -114,6 +138,19 @@ export type SetServiceStateMutation = (
   )>> }
 );
 
+export const ConfigFragmentDoc = gql`
+    fragment Config on Config {
+  team {
+    name
+    ip
+  }
+  service {
+    name
+    normalPort
+    stealthPort
+  }
+}
+    `;
 export const ServiceStateFragmentDoc = gql`
     fragment ServiceState on ServiceState {
   team {
@@ -127,20 +164,15 @@ export const ServiceStateFragmentDoc = gql`
     `;
 export const InitDocument = gql`
     query Init {
-  team {
-    name
-    ip
-  }
-  service {
-    name
-    normalPort
-    stealthPort
+  config {
+    ...Config
   }
   allState {
     ...ServiceState
   }
 }
-    ${ServiceStateFragmentDoc}`;
+    ${ConfigFragmentDoc}
+${ServiceStateFragmentDoc}`;
 
 /**
  * __useInitQuery__
@@ -166,6 +198,34 @@ export function useInitLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOpt
 export type InitQueryHookResult = ReturnType<typeof useInitQuery>;
 export type InitLazyQueryHookResult = ReturnType<typeof useInitLazyQuery>;
 export type InitQueryResult = ApolloReactCommon.QueryResult<InitQuery, InitQueryVariables>;
+export const SubscriptionConfigDocument = gql`
+    subscription SubscriptionConfig {
+  config {
+    ...Config
+  }
+}
+    ${ConfigFragmentDoc}`;
+
+/**
+ * __useSubscriptionConfigSubscription__
+ *
+ * To run a query within a React component, call `useSubscriptionConfigSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useSubscriptionConfigSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscriptionConfigSubscription({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscriptionConfigSubscription(baseOptions?: ApolloReactHooks.SubscriptionHookOptions<SubscriptionConfigSubscription, SubscriptionConfigSubscriptionVariables>) {
+        return ApolloReactHooks.useSubscription<SubscriptionConfigSubscription, SubscriptionConfigSubscriptionVariables>(SubscriptionConfigDocument, baseOptions);
+      }
+export type SubscriptionConfigSubscriptionHookResult = ReturnType<typeof useSubscriptionConfigSubscription>;
+export type SubscriptionConfigSubscriptionResult = ApolloReactCommon.SubscriptionResult<SubscriptionConfigSubscription>;
 export const SetServiceStateDocument = gql`
     mutation SetServiceState($teamName: String, $serviceName: String!, $state: State!) {
   setServiceState(teamName: $teamName, serviceName: $serviceName, state: $state) {
