@@ -10,6 +10,7 @@ type Mutation {
 type Subscription {
   config: Config!
   serviceStateChanged: ServiceState!
+  forceReload: Boolean!
 }
 
 type Config {
