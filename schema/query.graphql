@@ -1,5 +1,30 @@
-query Team {
+query Query {
   team {
     name
+    ip
+  }
+  service {
+    name
+    normalPort
+    stealthPort
+  }
+  allState {
+    ...ServiceState
+  }
+}
+
+fragment ServiceState on ServiceState {
+  team {
+    name
+  }
+  service {
+    name
+  }
+  state
+}
+
+mutation SetServiceState($teamName: String, $serviceName: String!, $state: State!) {
+  setServiceState(teamName: $teamName, serviceName: $serviceName, state: $state) {
+    ...ServiceState
   }
 }

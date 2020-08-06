@@ -9,7 +9,7 @@ type Mutation {
 }
 
 type Subscription {
-  team: [Team!]!
+  serviceStateChanged: ServiceState!
 }
 
 type Team {
