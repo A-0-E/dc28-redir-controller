@@ -49,7 +49,7 @@ async function forwardOperate(rule: fwRule, action: fwAction) {
     switch (action) {
         case fwAction.ADD:
             {
-                fwArgs.push("-I");
+                fwArgs.push("-A");
                 break;
             }
         case fwAction.DEL:
