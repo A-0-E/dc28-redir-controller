@@ -7,16 +7,12 @@ import { StateSelect } from './components/StateSelect'
 import { ColumnsType } from 'antd/lib/table'
 import { useQsState } from './qs'
 
-const useQuery = (defaultValue: string) => {
-  return [ window.location.search ]
-}
-
 const ServiceTable: React.FC = () => {
   useSubscriptionConfigSubscription({
-    onSubscriptionData: () => refetch(),
+    // onSubscriptionData: () => refetch(),
   })
   useSubscriptionServiceStateSubscription({
-    onSubscriptionData: () => refetch(),
+    // onSubscriptionData: () => refetch(),
   })
   const { loading, data, error, refetch } = useInitQuery()
   // const [ selectService, setSelectService ] = useState('')
@@ -28,10 +24,10 @@ const ServiceTable: React.FC = () => {
   const [ setServiceState, { loading: submiting } ] = useSetServiceStateMutation()
   const [ selectionKey, setSelectionKey ] = useState<string[]>([])
   useEffect(() => {
-    if (selectService === '' && data) {
-      setState({
-        service: data.config.service[0].name
-      })
+    if (data) {
+      if (!data.config.service.map(i => i.name).includes(selectService)) {
+        setSelectService(data.config.service[0].name)
+      }
     }
   }, [data, selectService, setState])
 

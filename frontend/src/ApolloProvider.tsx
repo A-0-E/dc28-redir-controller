@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react'
-import { ApolloClient, InMemoryCache, ApolloProvider as Provider } from '@apollo/client'
+import { ApolloClient, InMemoryCache, ApolloProvider as Provider, Reference } from '@apollo/client'
 import { WebSocketLink } from '@apollo/client/link/ws'
 import { ConnectionCtx, ConnectionState } from './components/Connection'
 import { SubscriptionClient } from 'subscriptions-transport-ws'
+import { ServiceStateFragment, ServiceStateFragmentDoc, InitDocument, InitQuery } from './generated/graphql'
 
 const BACKEND_ENDPOINT = 'localhost:4000'
 
@@ -31,31 +32,30 @@ const mergedByUpdatedAt = (existing: UpdatedAt | undefined, incoming: UpdatedAt)
   return incoming
 }
 
-// const removeOutdated = (states: ServiceStateFragment[]) => {
-//   const map: Record<string, Record<string, ServiceStateFragment>> = {}
-//   const getter = (s: ServiceStateFragment): ServiceStateFragment | undefined => map[s.team.name]?.[s.service.name]
-//   const setter = (s: ServiceStateFragment) => {
-//     map[s.team.name] = {
-//       ...map[s.team.name] ?? {},
-//       [s.service.name]: s,
-//     }
-//   }
-//   for (const s of states) {
-//     const v = getter(s)
-//     if (v) {
-//       setter(v.updatedAt < s.updatedAt ? s : v)
-//     } else {
-//       setter(s)
-//     }
-//   }
+const removeOutdated = (states: ServiceStateFragment[]) => {
+  const map: Record<string, Record<string, ServiceStateFragment>> = {}
+  const getter = (s: ServiceStateFragment): ServiceStateFragment | undefined => map[s.team.name]?.[s.service.name]
+  const setter = (s: ServiceStateFragment) => {
+    map[s.team.name] = {
+      ...map[s.team.name] ?? {},
+      [s.service.name]: s,
+    }
+  }
+  for (const s of states) {
+    const v = getter(s)
+    if (v) {
+      setter(v.updatedAt < s.updatedAt ? s : v)
+    } else {
+      setter(s)
+    }
+  }
 
-//   let out: ServiceStateFragment[] = []
-//   for (const i of Object.values(map)) {
-//     out.push(...Object.values(i))
-//   }
-//   return out
-// }
-
+  let out: ServiceStateFragment[] = []
+  for (const i of Object.values(map)) {
+    out.push(...Object.values(i))
+  }
+  return out
+}
 
 export const ApolloProvider: React.FC = ({ children }) => {
   const [ state, setState ] = useState(ConnectionState.Connecting)
@@ -94,57 +94,52 @@ export const ApolloProvider: React.FC = ({ children }) => {
                 merge: mergedByUpdatedAt,
               },
               allState: {
-                // merge (existing: ServiceStateFragment[] | undefined, incoming: ServiceStateFragment[], { cache }) {
-                //   const e = [...existing ?? [], ...incoming].map(ref => cache.readFragment({
-                //     id: cache.identify(ref),
-                //     fragment: ServiceStateFragmentDoc,
-                //   })) as ServiceStateFragment[]
+                merge (existing: ServiceStateFragment[] | undefined, incoming: ServiceStateFragment[], { cache }) {
+                  const e = [...existing ?? [], ...incoming].map(ref => cache.readFragment({
+                    id: cache.identify(ref),
+                    fragment: ServiceStateFragmentDoc,
+                  })) as ServiceStateFragment[]
+                  const r = removeOutdated(e)
 
-                //   return removeOutdated(e)
-                // }
+                  // console.log(e, r, existing, incoming)
+
+                  return r
+                }
               }
             }
           },
           Mutation: {
             fields: {
               setServiceState: {
-                // merge (existing, incoming: Reference[], { cache }) {
-                //   cache.writeQuery({
-                //     query: InitDocument,
-                //     data: {
-                //       allState: incoming.map(ref => cache.readFragment({
-                //         id: cache.identify(ref),
-                //         fragment: ServiceStateFragmentDoc,
-                //       })),
-                //     }
-                //   })
-                //   return incoming
-                // }
+                merge (existing, incoming: Reference[], { cache }) {
+                  cache.writeQuery({
+                    query: InitDocument,
+                    data: {
+                      allState: incoming.map(ref => cache.readFragment({
+                        id: cache.identify(ref),
+                        fragment: ServiceStateFragmentDoc,
+                      })),
+                    }
+                  })
+                  return incoming
+                }
               }
             }
           },
           Subscription: {
             fields: {
               serviceStateChanged: {
-                // merge (existing, incoming: Reference[], { cache }) {
-                //   const old = cache.readQuery<InitQuery>({
-                //     query: InitDocument
-                //   })
-                //   if (old) {
-                //     const allState = [...old.allState, ...incoming.map(ref => cache.readFragment({
-                //       id: cache.identify(ref),
-                //       fragment: ServiceStateFragmentDoc,
-                //     })) as ServiceStateFragment[] ]
-                //     cache.writeQuery({
-                //       query: InitDocument,
-                //       data: {
-                //         ...old,
-                //         allState: removeOutdated(allState),
-                //       }
-                //     })
-                //   }
-                //   return incoming
-                // }
+                merge (existing, incoming: Reference, { cache }) {
+                  cache.writeQuery({
+                    query: InitDocument,
+                    data: {
+                      allState: [cache.readFragment({
+                        id: cache.identify(incoming),
+                        fragment: ServiceStateFragmentDoc,
+                      })],
+                    }
+                  })
+                }
               }
             }
           }

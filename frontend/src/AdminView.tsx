@@ -7,14 +7,14 @@ import { StateSelect } from './components/StateSelect'
 
 const ServiceTable: React.FC<InitQuery & { refetch: () => void }> = ({ config: { team, service }, allState, refetch }) => {
   useSubscriptionConfigSubscription({
-    onSubscriptionData: () => refetch(),
+    // onSubscriptionData: () => refetch(),
   })
   useSubscriptionServiceStateSubscription({
-    onSubscriptionData: () => refetch(),
+    // onSubscriptionData: () => refetch(),
   })
 
   const [ setServiceState, { loading: submiting } ] = useSetServiceStateMutation({
-    onCompleted: () => refetch()
+    // onCompleted: () => refetch()
   })
   const [ transpose, setTranspose ] = useState(false)
   const data = allState.map(({ team, service, state }) => ({

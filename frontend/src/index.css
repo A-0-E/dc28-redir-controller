@@ -3,3 +3,7 @@
 body {
   padding: 20px;
 }
+
+.ant-select-selector , .ant-select-selection-item {
+  transition: none !important;
+}

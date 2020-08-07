@@ -6,7 +6,10 @@ export const qs = <T extends Record<string, string>>(v: T) => {
   return Object.keys(v).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(v[k])}`).join('&')
 }
 export const fromQs = (s: string) => {
-  return fromEntries(s.split('&').map(i => i.split('=', 2)))
+  if (!s) {
+    return {}
+  }
+  return fromEntries(s.split('&').map(i => i.split('=', 2))) ?? {}
 }
 export const useQs = <T>(): T => {
   const { search } = useLocation()
