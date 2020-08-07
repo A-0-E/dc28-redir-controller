@@ -3,7 +3,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider as Provider, Reference } fr
 import { WebSocketLink } from '@apollo/client/link/ws'
 import { ConnectionCtx, ConnectionState } from './components/Connection'
 import { SubscriptionClient } from 'subscriptions-transport-ws'
-import { ServiceStateFragment, ServiceStateFragmentDoc, InitDocument, InitQuery } from './generated/graphql'
+import { ServiceStateFragment, ServiceStateFragmentDoc, InitDocument } from './generated/graphql'
 
 const BACKEND_ENDPOINT = 'localhost:4000'
 

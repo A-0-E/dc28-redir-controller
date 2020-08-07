@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useInitQuery, useSubscriptionConfigSubscription, useSubscriptionServiceStateSubscription, useSetServiceStateMutation, State } from './generated/graphql'
 import { Loading } from './components/Loading'
 import { Radio, Table, Button } from 'antd'
@@ -18,9 +18,9 @@ const ServiceTable: React.FC = () => {
   // const [ selectService, setSelectService ] = useState('')
   const [ state, setState ] = useQsState<{ service: string }>('/')
   const selectService = state.service
-  const setSelectService = (n: string) => setState({
+  const setSelectService = useCallback((n: string) => setState({
     service: n
-  })
+  }), [ setState ])
   const [ setServiceState, { loading: submiting } ] = useSetServiceStateMutation()
   const [ selectionKey, setSelectionKey ] = useState<string[]>([])
   useEffect(() => {
@@ -29,7 +29,7 @@ const ServiceTable: React.FC = () => {
         setSelectService(data.config.service[0].name)
       }
     }
-  }, [data, selectService, setState])
+  }, [data, selectService, setState, setSelectService])
 
   if (!data || loading) {
     return <Loading loading={loading} />

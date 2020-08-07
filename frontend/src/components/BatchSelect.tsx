@@ -21,12 +21,13 @@ type BatchSelectProps = {
   onStealth: () => void
   onNormal: () => void
   onIgnore: () => void
+  disabled?: boolean
 }
 
-export const BatchSelect: React.FC<BatchSelectProps> = ({ onStealth, onNormal, onIgnore }) => {
+export const BatchSelect: React.FC<BatchSelectProps> = ({ onStealth, onNormal, onIgnore, disabled }) => {
   return <>
-    <Button style={StateStyle[State.Stealth]} onClick={onStealth}>STEALTH</Button>
-    <Button style={StateStyle[State.Normal]} onClick={onNormal}>Normal</Button>
-    <Button style={StateStyle[State.Ignore]} onClick={onIgnore}>Ignore</Button>
+    <Button disabled={disabled} style={StateStyle[State.Stealth]} onClick={onStealth}>STEALTH</Button>
+    <Button disabled={disabled} style={StateStyle[State.Normal]} onClick={onNormal}>Normal</Button>
+    <Button disabled={disabled} style={StateStyle[State.Ignore]} onClick={onIgnore}>Ignore</Button>
   </>
 }
