@@ -5,6 +5,10 @@ import { resolvers, Context } from './resolvers'
 
 import {getConfig, startWatch} from  './storage';
 import { watchState } from './states';
+import { logRoot } from './logger';
+
+const logger = logRoot.child({ defaultMeta: { service: 'endpoint' }, })
+
 
 async function main() {
   const schema = readFileSync(path.resolve(__dirname, '../../schema/schema.graphql')).toString()
@@ -26,7 +30,7 @@ async function main() {
   await watchState(10, pubsub, getConfig)
 
   server.listen().then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
+    logger.info(`🚀  Server ready at ${url}`);
   })
 }
-main().catch(e => console.error(e))
+main().catch(e => logger.error(e))

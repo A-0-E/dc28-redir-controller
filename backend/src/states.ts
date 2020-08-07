@@ -3,6 +3,10 @@ import { ServiceState, State, Config } from './generated/graphql'
 import { PubSub } from 'apollo-server';
 import { SubscriptionType } from './messages';
 import { mapIPtoTeam, mapPorttoService, newServiceStateItem, serviceStateToRule, jsonEqual } from './utils';
+import { logRoot } from './logger';
+
+const logger = logRoot.child({ defaultMeta: { service: 'state-manager' }, })
+
 
 let serviceState: ServiceState[];
 
@@ -78,7 +82,7 @@ export function getState() { return serviceState }
 
 // Make a full reset and send out notifications
 export async function resetState(pubsub: PubSub, config: Config): Promise<void> {
-    console.log("resetState triggered")
+    logger.warn("resetState triggered")
     serviceState = await parseRulesToStates(await getAllStatus(), config);
     // Send out the full-reload signal
     pubsub.publish(SubscriptionType.ForceReload, { forceReload: true })
@@ -95,14 +99,14 @@ export async function watchState(watchTimeout: number, pubsub: PubSub, getConfig
     try {
         await resetState(pubsub, getConfig())
     } catch (e) {
-        console.log(`Fatal error: can not reset state`, e)
+        logger.error(`Fatal error: can not reset state`, e)
         process.exit(-1)
     }
     setInterval(async () => {
         try {
             await compareState(getConfig())
         } catch (e) {
-            console.log(`Got different state (${e}), force reloading`)
+            logger.warn(`Got different state (${e}), force reloading`)
             await resetState(pubsub, getConfig())
         }
     }, watchTimeout * 1000);

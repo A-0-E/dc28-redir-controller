@@ -6,6 +6,9 @@ import chokidar from 'chokidar';
 import { Config, Team, Service, State } from './generated/graphql'
 import { PubSub } from 'apollo-server';
 import { SubscriptionType } from './messages';
+import { logRoot } from './logger';
+
+const logger = logRoot.child({ defaultMeta: { service: 'stoarge' }, })
 
 const read = util.promisify(fs.readFile);
 
@@ -48,15 +51,15 @@ export async function startWatch(filename: string, pubsub: PubSub) {
     try {
         await reload(filename)
     } catch (e) {
-        console.log(`Fatal error: can not do first load`, e)
+        logger.error(`Fatal error: can not do first load`, e)
         process.exit(-1)
     }
     chokidar.watch(filename).on('all', async (event, path) => {
-        console.log(`Received ${event} for ${path}`)
+        logger.info(`Received ${event} for ${path}`)
         try {
             await reload(filename);
         } catch (e) {
-            console.log(`Reload failed: ${e}`)
+            logger.error(`Reload failed: ${e}`)
             return
         }
         // if config changed, push a full-reload notification

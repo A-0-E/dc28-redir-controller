@@ -1,5 +1,9 @@
 import { execFile } from 'child_process';
 import util from 'util';
+import { format, transports, createLogger } from 'winston';
+import { logRoot } from './logger';
+
+const logger = logRoot.child({ defaultMeta: { service: 'native-commands' }, })
 
 const exec = util.promisify(execFile);
 
@@ -22,9 +26,10 @@ enum fwAction {
     DEL,
 };
 
-let needSudo: boolean = ((process?.env?.["NEED_SUDO"]?.length || 0) > 0) || false
+let needSudo: boolean = ((process.env.NEED_SUDO?.length || 0) > 0) || false
 
 async function executeIPTables(args: string[]) {
+    logger.silly("Execute firewall command", { args })
     if (needSudo) {
         return await exec(sudo_path, [iptables_path, ...args])
     } else {
@@ -76,10 +81,12 @@ async function forwardOperate(rule: fwRule, action: fwAction) {
 }
 
 async function addForward(rule: fwRule) {
+    logger.info("Adding forward", {rule})
     return forwardOperate(rule, fwAction.ADD)
 }
 
 async function delForward(rule: fwRule) {
+    logger.info("Removing forward", {rule})
     return forwardOperate(rule, fwAction.DEL)
 }
 
