@@ -5,7 +5,7 @@ import { ConnectionCtx, ConnectionState } from './components/Connection'
 import { SubscriptionClient } from 'subscriptions-transport-ws'
 import { ServiceStateFragment, ServiceStateFragmentDoc, InitDocument } from './generated/graphql'
 
-const BACKEND_ENDPOINT = 'localhost:4000'
+const BACKEND_ENDPOINT = process.env.BACKEND_ENDPOINT
 
 
 // const httpLink = new HttpLink({
