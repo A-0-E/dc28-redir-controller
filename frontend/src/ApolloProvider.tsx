@@ -1,15 +1,11 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { ApolloClient, InMemoryCache, ApolloProvider as Provider } from '@apollo/client'
 import { WebSocketLink } from '@apollo/client/link/ws'
+import { ConnectionCtx, ConnectionState } from './components/Connection'
+import { SubscriptionClient } from 'subscriptions-transport-ws'
 
 const BACKEND_ENDPOINT = 'localhost:4000'
 
-const wsLink = new WebSocketLink({
-  uri: `${window.location.protocol.replace('http', 'ws')}//${BACKEND_ENDPOINT ?? window.location.host}/graphql`,
-  options: {
-    reconnect: true
-  }
-})
 
 // const httpLink = new HttpLink({
 //   uri: `${window.location.protocol}//${BACKEND_ENDPOINT ?? window.location.host}/graphql`,
@@ -60,87 +56,107 @@ const mergedByUpdatedAt = (existing: UpdatedAt | undefined, incoming: UpdatedAt)
 //   return out
 // }
 
-const client = new ApolloClient({
-  uri: '/',
-  cache: new InMemoryCache({
-    typePolicies: {
-      Team: {
-        keyFields: ['name'],
-      },
-      Service: {
-        keyFields: ['name'],
-      },
-      ServiceState: {
-        keyFields: (v) => {
-          // @ts-ignore
-          return `${v.team.name}.${v.service.name}`
-        },
-      },
-      Query: {
-        fields: {
-          config: {
-            merge: mergedByUpdatedAt,
-          },
-          allState: {
-            // merge (existing: ServiceStateFragment[] | undefined, incoming: ServiceStateFragment[], { cache }) {
-            //   const e = [...existing ?? [], ...incoming].map(ref => cache.readFragment({
-            //     id: cache.identify(ref),
-            //     fragment: ServiceStateFragmentDoc,
-            //   })) as ServiceStateFragment[]
-
-            //   return removeOutdated(e)
-            // }
-          }
-        }
-      },
-      Mutation: {
-        fields: {
-          setServiceState: {
-            // merge (existing, incoming: Reference[], { cache }) {
-            //   cache.writeQuery({
-            //     query: InitDocument,
-            //     data: {
-            //       allState: incoming.map(ref => cache.readFragment({
-            //         id: cache.identify(ref),
-            //         fragment: ServiceStateFragmentDoc,
-            //       })),
-            //     }
-            //   })
-            //   return incoming
-            // }
-          }
-        }
-      },
-      Subscription: {
-        fields: {
-          serviceStateChanged: {
-            // merge (existing, incoming: Reference[], { cache }) {
-            //   const old = cache.readQuery<InitQuery>({
-            //     query: InitDocument
-            //   })
-            //   if (old) {
-            //     const allState = [...old.allState, ...incoming.map(ref => cache.readFragment({
-            //       id: cache.identify(ref),
-            //       fragment: ServiceStateFragmentDoc,
-            //     })) as ServiceStateFragment[] ]
-            //     cache.writeQuery({
-            //       query: InitDocument,
-            //       data: {
-            //         ...old,
-            //         allState: removeOutdated(allState),
-            //       }
-            //     })
-            //   }
-            //   return incoming
-            // }
-          }
-        }
-      }
-    }
-  }),
-  link: wsLink,
-})
 
 export const ApolloProvider: React.FC = ({ children }) => {
-  return <Provider client={client}>{children}</Provider>
+  const [ state, setState ] = useState(ConnectionState.Connecting)
+  const client = useMemo(() => {
+    const subClient = new SubscriptionClient(
+      `${window.location.protocol.replace('http', 'ws')}//${BACKEND_ENDPOINT ?? window.location.host}/graphql`,
+      {
+        reconnect: true,
+      }
+    )
+    subClient.onConnected(() => setState(ConnectionState.Connected))
+    subClient.onDisconnected(() => setState(ConnectionState.Disconnect))
+    subClient.onConnecting(() => setState(ConnectionState.Connecting))
+    subClient.onReconnecting(() => setState(ConnectionState.Connecting))
+    subClient.onReconnected(() => setState(ConnectionState.Connected))
+    const wsLink = new WebSocketLink(subClient)
+    const client = new ApolloClient({
+      uri: '/',
+      cache: new InMemoryCache({
+        typePolicies: {
+          Team: {
+            keyFields: ['name'],
+          },
+          Service: {
+            keyFields: ['name'],
+          },
+          ServiceState: {
+            keyFields: (v) => {
+              // @ts-ignore
+              return `${v.team.name}.${v.service.name}`
+            },
+          },
+          Query: {
+            fields: {
+              config: {
+                merge: mergedByUpdatedAt,
+              },
+              allState: {
+                // merge (existing: ServiceStateFragment[] | undefined, incoming: ServiceStateFragment[], { cache }) {
+                //   const e = [...existing ?? [], ...incoming].map(ref => cache.readFragment({
+                //     id: cache.identify(ref),
+                //     fragment: ServiceStateFragmentDoc,
+                //   })) as ServiceStateFragment[]
+
+                //   return removeOutdated(e)
+                // }
+              }
+            }
+          },
+          Mutation: {
+            fields: {
+              setServiceState: {
+                // merge (existing, incoming: Reference[], { cache }) {
+                //   cache.writeQuery({
+                //     query: InitDocument,
+                //     data: {
+                //       allState: incoming.map(ref => cache.readFragment({
+                //         id: cache.identify(ref),
+                //         fragment: ServiceStateFragmentDoc,
+                //       })),
+                //     }
+                //   })
+                //   return incoming
+                // }
+              }
+            }
+          },
+          Subscription: {
+            fields: {
+              serviceStateChanged: {
+                // merge (existing, incoming: Reference[], { cache }) {
+                //   const old = cache.readQuery<InitQuery>({
+                //     query: InitDocument
+                //   })
+                //   if (old) {
+                //     const allState = [...old.allState, ...incoming.map(ref => cache.readFragment({
+                //       id: cache.identify(ref),
+                //       fragment: ServiceStateFragmentDoc,
+                //     })) as ServiceStateFragment[] ]
+                //     cache.writeQuery({
+                //       query: InitDocument,
+                //       data: {
+                //         ...old,
+                //         allState: removeOutdated(allState),
+                //       }
+                //     })
+                //   }
+                //   return incoming
+                // }
+              }
+            }
+          }
+        }
+      }),
+      link: wsLink,
+    })
+    return client
+  }, [])
+  return <>
+    <ConnectionCtx.Provider value={state}>
+      <Provider client={client}>{children}</Provider>
+    </ConnectionCtx.Provider>
+  </>
 }
