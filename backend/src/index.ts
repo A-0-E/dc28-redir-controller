@@ -6,6 +6,7 @@ import { resolvers, Context } from './resolvers'
 import {getConfig, startWatch} from  './storage';
 import { watchState } from './states';
 import { logRoot } from './logger';
+import { configPath } from './environ';
 
 const logger = logRoot.child({ defaultMeta: { service: 'endpoint' }, })
 
@@ -26,7 +27,7 @@ async function main() {
   })
 
   // Watch the config
-  await startWatch("./config.example.yaml", pubsub)
+  await startWatch(configPath, pubsub)
   await watchState(10, pubsub, getConfig)
 
   server.listen().then(({ url }) => {

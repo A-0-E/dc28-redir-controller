@@ -2,6 +2,7 @@ import { execFile } from 'child_process';
 import util from 'util';
 import { format, transports, createLogger } from 'winston';
 import { logRoot } from './logger';
+import { needSudo } from './environ';
 
 const logger = logRoot.child({ defaultMeta: { service: 'native-commands' }, })
 
@@ -26,10 +27,9 @@ enum fwAction {
     DEL,
 };
 
-let needSudo: boolean = ((process.env.NEED_SUDO?.length || 0) > 0) || false
 
 async function executeIPTables(args: string[]) {
-    logger.silly("Execute firewall command", { args })
+    logger.silly("Execute firewall command", { args, needSudo })
     if (needSudo) {
         return await exec(sudo_path, [iptables_path, ...args])
     } else {
