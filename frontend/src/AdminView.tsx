@@ -7,11 +7,9 @@ import { StateSelect } from './components/StateSelect'
 
 const ServiceTable: React.FC<InitQuery & { refetch: () => void }> = ({ config: { team, service }, allState, refetch }) => {
   useSubscriptionConfigSubscription({
-    shouldResubscribe: true,
     onSubscriptionData: () => refetch(),
   })
   useSubscriptionServiceStateSubscription({
-    shouldResubscribe: true,
     onSubscriptionData: () => refetch(),
   })
 
@@ -76,7 +74,9 @@ export const AdminView: React.FC = () => {
   return <>
     <div className='App'>
       { error && <>{'Error:' + String(error)} <Button onClick={() => refetch()}>Refetch</Button> </> }
-      { loading || !data ? <Loading /> : <ServiceTable {...data!} refetch={refetch} /> }
+      <Loading loading={loading}>
+        <ServiceTable {...data!} refetch={refetch} />
+      </Loading>
     </div>
   </>
 }

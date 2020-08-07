@@ -1,16 +1,89 @@
-import React, { useState } from 'react'
-import { useInitQuery, InitQuery, useSubscriptionConfigSubscription, useSubscriptionServiceStateSubscription } from './generated/graphql'
+import React, { useState, useEffect } from 'react'
+import { useInitQuery, useSubscriptionConfigSubscription, useSubscriptionServiceStateSubscription, useSetServiceStateMutation, State } from './generated/graphql'
 import { Loading } from './components/Loading'
-import { Radio, Button } from 'antd'
+import { Radio, Table, Button } from 'antd'
+import { BatchSelect } from './components/BatchSelect'
+import { StateSelect } from './components/StateSelect'
+import { ColumnsType } from 'antd/lib/table'
+import { useQsState } from './qs'
 
-const ServiceTable: React.FC<InitQuery> = ({ config: { service } }) => {
-  useSubscriptionConfigSubscription()
-  useSubscriptionServiceStateSubscription()
+const useQuery = (defaultValue: string) => {
+  return [ window.location.search ]
+}
 
-  const [ selectService, setSelectService ] = useState(service[0].name)
-  // const [ setServiceState ] = useSetServiceStateMutation()
+const ServiceTable: React.FC = () => {
+  useSubscriptionConfigSubscription({
+    onSubscriptionData: () => refetch(),
+  })
+  useSubscriptionServiceStateSubscription({
+    onSubscriptionData: () => refetch(),
+  })
+  const { loading, data, error, refetch } = useInitQuery()
+  // const [ selectService, setSelectService ] = useState('')
+  const [ state, setState ] = useQsState<{ service: string }>('/')
+  const selectService = state.service
+  const setSelectService = (n: string) => setState({
+    service: n
+  })
+  const [ setServiceState, { loading: submiting } ] = useSetServiceStateMutation()
+  const [ selectionKey, setSelectionKey ] = useState<string[]>([])
+  useEffect(() => {
+    if (selectService === '' && data) {
+      setState({
+        service: data.config.service[0].name
+      })
+    }
+  }, [data, selectService, setState])
+
+  if (!data || loading) {
+    return <Loading loading={loading} />
+  }
+
+  const { config: { team, service }, allState } = data
+  const dataSource = team.map(({ name }) => ({
+    team: name,
+    state: allState.find(i => i.team.name === name && i.service.name === selectService)?.state ?? State.Ignore
+  }))
+  const columns: ColumnsType<typeof dataSource[0]> = [{
+    title: 'Team name',
+    dataIndex: 'team',
+    key: 'team'
+  }, {
+    title: 'Service status',
+    dataIndex: 'state',
+    key: 'state',
+    render (_, { team, state }) {
+      return <StateSelect
+        disabled={submiting}
+        tooltip={<>
+          <div>Team: { team }</div>
+          <div>Service: {selectService}</div>
+        </>}
+        value={state}
+        onChange={(state) => {
+          setServiceState({
+            variables: {
+              teamName: team,
+              serviceName: selectService,
+              state
+            }
+          })
+        }} />
+    }
+  }]
+  const setMulti = (state: State) => async () => {
+    let promises = selectionKey.map(teamName => setServiceState({
+      variables: {
+        teamName,
+        serviceName: selectService,
+        state
+      }
+    }))
+    await Promise.all(promises)
+  }
 
   return <>
+    { error && <>{'Error:' + String(error)} <Button onClick={() => refetch()}>Refetch</Button> </> }
     <div>
       <label>Service name</label>
     </div>
@@ -20,17 +93,30 @@ const ServiceTable: React.FC<InitQuery> = ({ config: { service } }) => {
       </Radio.Group>
     </div>
     <br />
-    <Button>STEALTH</Button>
+    <BatchSelect
+      onStealth={setMulti(State.Stealth)}
+      onNormal={setMulti(State.Normal)}
+      onIgnore={setMulti(State.Ignore)}
+    />
+    <Table
+      rowSelection={{
+        type: 'checkbox',
+        selectedRowKeys: selectionKey,
+        onChange: (s) => setSelectionKey(s as string[]),
+      }}
+      pagination={false}
+      rowKey='team'
+      columns={columns}
+      dataSource={dataSource}
+    />
   </>
 }
 
 export const NormalView: React.FC = () => {
-  const { loading, data, error } = useInitQuery()
 
   return <>
     <div className='App'>
-      { error && 'Error:' + String(error) }
-      { loading ? <Loading /> : <ServiceTable {...data!} /> }
+      <ServiceTable />
     </div>
   </>
 }

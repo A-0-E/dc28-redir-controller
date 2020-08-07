@@ -15,14 +15,17 @@ const StateStyle: Record<State, React.CSSProperties> = {
   [State.Ignore]: {
     background: '#fff',
     color: '#000',
+    transition: 'none',
   },
   [State.Stealth]: {
     background: '#e54545',
     color: '#fff',
+    transition: 'none',
   },
   [State.Normal]: {
     background: '#0ABF5B',
     color: '#fff',
+    transition: 'none',
   },
 }
 

@@ -4,11 +4,14 @@ import './index.css'
 import { App } from './App'
 import * as serviceWorker from './serviceWorker'
 import { ApolloProvider } from './ApolloProvider'
+import { BrowserRouter } from 'react-router-dom'
 
 ReactDOM.render(
-  <ApolloProvider>
-    <App />
-  </ApolloProvider>,
+  <BrowserRouter>
+    <ApolloProvider>
+      <App />
+    </ApolloProvider>
+  </BrowserRouter>,
   document.getElementById('root')
 )
 
