@@ -21,6 +21,7 @@ async function main() {
   }
 
   const server = new ApolloServer({
+    cors: true,
     typeDefs,
     resolvers,
     context,
@@ -30,8 +31,7 @@ async function main() {
   await startWatch(configPath, pubsub)
   await watchState(10, pubsub, getConfig)
 
-  server.listen().then(({ url }) => {
-    logger.info(`🚀  Server ready at ${url}`);
-  })
+  const { url } = await server.listen()
+  logger.info(`🚀  Server ready at ${url}`);
 }
 main().catch(e => logger.error(e))
