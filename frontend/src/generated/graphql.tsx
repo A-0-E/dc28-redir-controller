@@ -77,6 +77,7 @@ export enum State {
 
 export type ConfigFragment = (
   { __typename?: 'Config' }
+  & Pick<Config, 'updatedAt'>
   & { team: Array<(
     { __typename?: 'Team' }
     & Pick<Team, 'name' | 'ip'>
@@ -124,7 +125,7 @@ export type SubscriptionServiceStateSubscription = (
 
 export type ServiceStateFragment = (
   { __typename?: 'ServiceState' }
-  & Pick<ServiceState, 'state'>
+  & Pick<ServiceState, 'state' | 'updatedAt'>
   & { team: (
     { __typename?: 'Team' }
     & Pick<Team, 'name'>
@@ -160,6 +161,7 @@ export const ConfigFragmentDoc = gql`
     normalPort
     stealthPort
   }
+  updatedAt
 }
     `;
 export const ServiceStateFragmentDoc = gql`
@@ -171,6 +173,7 @@ export const ServiceStateFragmentDoc = gql`
     name
   }
   state
+  updatedAt
 }
     `;
 export const InitDocument = gql`

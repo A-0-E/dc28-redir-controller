@@ -1,12 +1,14 @@
 import React from 'react'
 import { State } from '../generated/graphql'
-import { Select } from 'antd'
+import { Select, Tooltip } from 'antd'
 
 const { Option } = Select
 
 type StateSelectProps = {
   value: State,
   onChange: (s: State) => void,
+  tooltip?: React.ReactNode
+  disabled?: boolean
 }
 
 const StateStyle: Record<State, React.CSSProperties> = {
@@ -24,15 +26,18 @@ const StateStyle: Record<State, React.CSSProperties> = {
   },
 }
 
-export const StateSelect: React.FC<StateSelectProps> = ({ value, onChange }) => {
+export const StateSelect: React.FC<StateSelectProps> = ({ value, onChange, tooltip, disabled }) => {
   return <>
-    <Select
-      value={value}
-      onChange={onChange}
-      bordered={false}
-      style={StateStyle[value]}
-    >
-      { Object.values(State).map(v => <Option style={StateStyle[v]} key={v} value={v}>{v}</Option>) }
-    </Select>
+    <Tooltip placement='left' title={tooltip}>
+      <Select
+        disabled={disabled}
+        value={value}
+        onChange={onChange}
+        bordered={false}
+        style={StateStyle[value]}
+      >
+        { Object.values(State).map(v => <Option style={StateStyle[v]} key={v} value={v}>{v}</Option>) }
+      </Select>
+    </Tooltip>
   </>
 }

@@ -8,6 +8,7 @@ fragment Config on Config {
     normalPort
     stealthPort
   }
+  updatedAt
 }
 
 query Init {
@@ -39,6 +40,7 @@ fragment ServiceState on ServiceState {
     name
   }
   state
+  updatedAt
 }
 
 mutation SetServiceState($teamName: String, $serviceName: String!, $state: State!) {

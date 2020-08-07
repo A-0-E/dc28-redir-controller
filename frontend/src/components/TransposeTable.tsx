@@ -30,7 +30,7 @@ export const TransposeTable: React.FC<TransposeTableProps> = ({
   render,
 }) => {
   if (transpose) {
-    [ y, x ] = [ x, y ];
+    [ y, x ] = [ x, y ]
   }
 
   const columns: ColumnsType<any> = useMemo(() => {
@@ -58,11 +58,15 @@ export const TransposeTable: React.FC<TransposeTableProps> = ({
         _yName: i.title,
         ...fromEntries(x.header.map(({ id }) => {
           const node = data.find(v => v[x.fieldKey] === id && v[y.fieldKey] === i.id)
-          return [ id, render(node, id, i.id) ]
+          let [ xId, yId ] = [ id, i.id ]
+          if (transpose) {
+            [ yId, xId ] = [ xId, yId ]
+          }
+          return [ id, render(node, xId, yId) ]
         }))
       }
     })
-  }, [ data, x, y, render ])
+  }, [ data, x, y, render, transpose ])
 
   return <Table
     rowKey={({ _key }) => _key}
