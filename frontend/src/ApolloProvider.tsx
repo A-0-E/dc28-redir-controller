@@ -5,8 +5,7 @@ import { ConnectionCtx, ConnectionState } from './components/Connection'
 import { SubscriptionClient } from 'subscriptions-transport-ws'
 import { ServiceStateFragment, ServiceStateFragmentDoc, InitDocument } from './generated/graphql'
 
-const BACKEND_ENDPOINT = process.env.BACKEND_ENDPOINT
-
+const BACKEND_ENDPOINT = process.env.REACT_APP_BACKEND_ENDPOINT
 
 // const httpLink = new HttpLink({
 //   uri: `${window.location.protocol}//${BACKEND_ENDPOINT ?? window.location.host}/graphql`,
@@ -23,14 +22,6 @@ const BACKEND_ENDPOINT = process.env.BACKEND_ENDPOINT
 //   wsLink,
 //   httpLink,
 // )
-
-type UpdatedAt = { updatedAt: number }
-const mergedByUpdatedAt = (existing: UpdatedAt | undefined, incoming: UpdatedAt) => {
-  if (existing) {
-    return existing.updatedAt < incoming.updatedAt ? incoming : existing
-  }
-  return incoming
-}
 
 const removeOutdated = (states: ServiceStateFragment[]) => {
   const map: Record<string, Record<string, ServiceStateFragment>> = {}
@@ -90,9 +81,6 @@ export const ApolloProvider: React.FC = ({ children }) => {
           },
           Query: {
             fields: {
-              config: {
-                merge: mergedByUpdatedAt,
-              },
               allState: {
                 merge (existing: ServiceStateFragment[] | undefined, incoming: ServiceStateFragment[], { cache }) {
                   const e = [...existing ?? [], ...incoming].map(ref => cache.readFragment({
@@ -140,7 +128,17 @@ export const ApolloProvider: React.FC = ({ children }) => {
                     }
                   })
                 }
-              }
+              },
+              config: {
+                merge (existing, incoming: Reference, { cache }) {
+                  cache.writeQuery({
+                    query: InitDocument,
+                    data: {
+                      config: incoming,
+                    }
+                  })
+                }
+              },
             }
           }
         }

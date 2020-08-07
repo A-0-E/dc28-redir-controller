@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useInitQuery, InitQuery, State, useSubscriptionConfigSubscription, useSetServiceStateMutation, useSubscriptionServiceStateSubscription } from './generated/graphql'
+import { useInitQuery, InitQuery, State, useSubscriptionConfigSubscription, useSetServiceStateMutation, useSubscriptionServiceStateSubscription, useSubscriptionReloadSubscription } from './generated/graphql'
 import { Loading } from './components/Loading'
 import { TransposeTable } from './components/TransposeTable'
 import { Checkbox, Button } from 'antd'
@@ -12,6 +12,9 @@ const ServiceTable: React.FC<InitQuery & { refetch: () => void }> = ({ config: {
   })
   useSubscriptionServiceStateSubscription({
     // onSubscriptionData: () => refetch(),
+  })
+  useSubscriptionReloadSubscription({
+    onSubscriptionData: () => refetch(),
   })
 
   const [ setServiceState, { loading: submiting } ] = useSetServiceStateMutation({

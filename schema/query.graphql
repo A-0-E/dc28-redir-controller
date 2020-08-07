@@ -32,6 +32,10 @@ subscription SubscriptionServiceState {
   }
 }
 
+subscription SubscriptionReload {
+  forceReload
+}
+
 fragment ServiceState on ServiceState {
   team {
     name

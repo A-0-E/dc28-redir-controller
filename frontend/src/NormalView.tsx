@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useInitQuery, useSubscriptionConfigSubscription, useSubscriptionServiceStateSubscription, useSetServiceStateMutation, State } from './generated/graphql'
+import { useInitQuery, useSubscriptionConfigSubscription, useSubscriptionServiceStateSubscription, useSetServiceStateMutation, State, useSubscriptionReloadSubscription } from './generated/graphql'
 import { Loading } from './components/Loading'
 import { Radio, Table, Button } from 'antd'
 import { BatchSelect } from './components/BatchSelect'
@@ -15,6 +15,10 @@ const ServiceTable: React.FC = () => {
     // onSubscriptionData: () => refetch(),
   })
   const { loading, data, error, refetch } = useInitQuery()
+  useSubscriptionReloadSubscription({
+    onSubscriptionData: () => refetch(),
+  })
+
   // const [ selectService, setSelectService ] = useState('')
   const [ state, setState ] = useQsState<{ service: string }>('/')
   const selectService = state.service
