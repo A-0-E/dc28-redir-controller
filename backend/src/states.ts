@@ -40,6 +40,7 @@ async function compareState(config: Config): Promise<void> {
 export async function changeState(config: Config, pubsub: PubSub, newState: State, serviceName: string, teamName?: string | null): Promise<ServiceState[]> {
     // if team name is not defined, all teams will be affected
     let teamList: string[] = []
+    let performedActions: ServiceState[] = []
     if (!teamName) {
         teamList = config.team.map(m => m.name)
     } else {
@@ -72,9 +73,10 @@ export async function changeState(config: Config, pubsub: PubSub, newState: Stat
             serviceState.push(newItem)
         }
         // 4. publish the message
+        performedActions.push(newItem)
         pubsub.publish(SubscriptionType.ServiceStateChanged, { serviceStateChanged: newItem })
     }
-    return serviceState
+    return performedActions
 }
 
 // Return local state directly
