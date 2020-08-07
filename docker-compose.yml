@@ -1,0 +1,30 @@
+version: "2"
+
+networks:
+  rc:
+    external: false
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    networks:
+      - rc
+    volumes:
+      - ./config.yaml:/app/config.yaml
+    cap_add:
+      - ALL
+  nginx:
+    build:
+      context: frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - "9100:80"
+    volumes:
+      - ./nginx.conf.template:/tmp/nginx.conf.template
+    command: /bin/sh -c "envsubst '$$BACKEND' < /tmp/nginx.conf.template > /etc/nginx/conf.d/default.conf && exec nginx -g 'daemon off;'"
+    environment:
+      - BACKEND=backend
+    networks:
+      - rc
