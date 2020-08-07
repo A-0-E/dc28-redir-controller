@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useInitQuery, useSubscriptionConfigSubscription, useSubscriptionServiceStateSubscription, useSetServiceStateMutation, State, useSubscriptionReloadSubscription } from './generated/graphql'
 import { Loading } from './components/Loading'
-import { Radio, Table, Button } from 'antd'
+import { Radio, Table, Button, Tooltip } from 'antd'
 import { BatchSelect } from './components/BatchSelect'
 import { StateSelect } from './components/StateSelect'
 import { ColumnsType } from 'antd/lib/table'
@@ -40,14 +40,18 @@ const ServiceTable: React.FC = () => {
   }
 
   const { config: { team, service }, allState } = data
-  const dataSource = team.map(({ name }) => ({
+  const dataSource = team.map(({ name, ip }) => ({
     team: name,
+    ip,
     state: allState.find(i => i.team.name === name && i.service.name === selectService)?.state ?? State.Ignore
   }))
   const columns: ColumnsType<typeof dataSource[0]> = [{
     title: 'Team name',
     dataIndex: 'team',
-    key: 'team'
+    key: 'team',
+    render (team, i) {
+      return <span>{team} ({i.ip})</span>
+    }
   }, {
     title: 'Service status',
     dataIndex: 'state',
@@ -89,7 +93,12 @@ const ServiceTable: React.FC = () => {
     </div>
     <div>
       <Radio.Group onChange={e => setSelectService(e.target.value)} value={selectService}>
-        {service.map(i => <Radio.Button key={i.name} value={i.name}>{i.name}</Radio.Button>)}
+        {service.map(i => <Tooltip title={<>
+          <div>Normal port: {i.normalPort}</div>
+          <div>Stealth port: {i.stealthPort}</div>
+        </>}>
+          <Radio.Button key={i.name} value={i.name}>{i.name}</Radio.Button>
+        </Tooltip>)}
       </Radio.Group>
     </div>
     <br />

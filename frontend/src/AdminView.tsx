@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useInitQuery, InitQuery, State, useSubscriptionConfigSubscription, useSetServiceStateMutation, useSubscriptionServiceStateSubscription, useSubscriptionReloadSubscription } from './generated/graphql'
 import { Loading } from './components/Loading'
 import { TransposeTable } from './components/TransposeTable'
-import { Checkbox, Button } from 'antd'
+import { Checkbox, Button, Tooltip } from 'antd'
 import { StateSelect } from './components/StateSelect'
 import { BatchSelect } from './components/BatchSelect'
 
@@ -51,7 +51,9 @@ const ServiceTable: React.FC<InitQuery & { refetch: () => void }> = ({ config: {
         fieldKey: 'team',
         header: team.map(i => ({
           id: i.name,
-          title: i.name,
+          title: <>
+            <span>{i.name} ({i.ip})</span>
+          </>,
         }))
       }}
       y={{
@@ -60,18 +62,23 @@ const ServiceTable: React.FC<InitQuery & { refetch: () => void }> = ({ config: {
         header: service.map(i => ({
           id: i.name,
           title: <>
-            <Checkbox
-              checked={i.name === selectedService}
-              onChange={e => {
-                if (e.target.checked) {
-                  setSelectedService(i.name)
-                } else {
-                  setSelectedService('')
-                }
-              }}
-            >
+            <Tooltip title={<>
+              <div>Normal port: {i.normalPort}</div>
+              <div>Stealth port: {i.stealthPort}</div>
+            </>}>
+              <Checkbox
+                checked={i.name === selectedService}
+                onChange={e => {
+                  if (e.target.checked) {
+                    setSelectedService(i.name)
+                  } else {
+                    setSelectedService('')
+                  }
+                }}
+              >
                 {i.name}
-            </Checkbox>
+              </Checkbox>
+            </Tooltip>
           </>,
         }))
       }}
