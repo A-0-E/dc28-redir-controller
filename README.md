@@ -4,7 +4,7 @@ DC28 Redirection Controller (RC)
 
 Thanks for our coders @spacemeowx2, @davendu and our UI/UE designer @dadongqian for making this tool available within a day.
 
-## Wuat is it?
+## What is it?
 
 In DC28, each service could have two ports: 
 
