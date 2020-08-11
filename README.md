@@ -1,22 +1,42 @@
-# dc28-redir-controller
+# DC28 RC
+
 DC28 Redirection Controller (RC)
 
-## TBD DEbUg CoMmAnD
+Thanks for our coders @spacemeowx2, @davendu and our UI/UE designer @dadongqian for making this tool available within a day.
 
-```
-#if need sudo: -e NEED_SUDO=1
-docker run -it --rm -p 3000:3000 -p 4000:4000 -v "$(pwd):/app" --cap-add CAP_NET_ADMIN --cap-add CAP_NET_RAW --network host node bash
-apt update
-apt install -y iptables vim-tiny
+## Wuat is it?
+
+In DC28, each service could have two ports: 
+
+* Normal port (X): get all points but traffic captured for victim
+* Stealth port (10000+X): traffic hidden while points half for that round
+
+So we wrote this tool to manage which port is targeted, prevent our exploiters spending time to fix their port number.
+
+Changes would be updated real time, to make different team members sharing their state.
+
+## How it works?
+
+Prepare your IPTables:
+
+```bash
 iptables -t nat -N fwdctrl_chain
 iptables -t nat -I PREROUTING -j fwdctrl_chain
-# For backend
-cd /app/backend
-yarn install
-yarn start
 ```
 
+Then just `docker-compose up -d`
 
-## to fix
+## Seriously, I mean how it works?
 
-why ctrl+c cause `address already in use`?
+Our DEVOPS team make all traffic related with this CTF going through a single gateway, and then distributed to internal network or OOO's team infra. Thus some simple IPTables would be enough.
+
+## Q/A
+
+* Is "RC" specially crafted to mix with "Release Candidate"?
+    * Yes!
+* Does it work?
+    * Maybe?
+* Is it safe?
+    * No.
+* Why not golang/iptables/rust/.....?
+    * Lazzzy.
