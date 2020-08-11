@@ -45,7 +45,7 @@ const ServiceTable: React.FC<InitQuery & { refetch: () => void }> = ({ config: {
       onIgnore={setTeam(State.Ignore)}
     />
     <TransposeTable
-      transpose={transpose}
+      transpose={!transpose}
       x={{
         title: 'Team',
         fieldKey: 'team',
