@@ -33,9 +33,9 @@ async function executeIPTables(args: string[]) {
     const iptables_path = getConfig().iptables_command_name ?? iptables_fallback_path;
     logger.silly("Execute firewall command", { args, needSudo })
     if (needSudo) {
-        return await exec(sudo_path, [iptables_fallback_path, ...args])
+        return await exec(sudo_path, [iptables_path, ...args])
     } else {
-        return await exec(iptables_fallback_path, args)
+        return await exec(iptables_path, args)
     }
 }
 
