@@ -12,11 +12,13 @@ const logger = logRoot.child({ defaultMeta: { service: 'stoarge' }, })
 
 const read = util.promisify(fs.readFile);
 
-let config: Config;
+type configFile = Config & { iptables_command_name: string }
+
+let config: configFile;
 
 async function reload(filename: string): Promise<void> {
     const file = await read(filename, { encoding: "utf-8" })
-    let newConfig: Config = await YAML.parse(file)
+    let newConfig: configFile = await YAML.parse(file)
     for (let i = 0; i < newConfig.service.length; i++) {
         if (!newConfig.service[i].stealthPort) {
             newConfig.service[i].stealthPort = newConfig.service[i].normalPort + 10000;

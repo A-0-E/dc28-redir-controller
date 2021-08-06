@@ -1,3 +1,4 @@
+iptables_command_name: iptables-legacy
 team:
   - name: ppp
     ip: 1.1.1.1

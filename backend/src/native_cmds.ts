@@ -3,13 +3,14 @@ import util from 'util';
 import { format, transports, createLogger } from 'winston';
 import { logRoot } from './logger';
 import { needSudo } from './environ';
+import { getConfig } from './storage';
 
 const logger = logRoot.child({ defaultMeta: { service: 'native-commands' }, })
 
 const exec = util.promisify(execFile);
 
 const sudo_path = "/usr/bin/sudo"
-const iptables_path = "/sbin/iptables";
+const iptables_fallback_path = "/sbin/iptables";
 const chain_name = "fwdctrl_chain";
 
 const iptables_regex = /-A fwdctrl_chain -d (?<sip>[\d\.]+)\/32 -p tcp -m tcp --dport (?<sport>\d+) -m comment --comment "\|time=(?<time>\d+)\|" -j DNAT --to-destination (?<dip>[\d\.]+):(?<dport>\d+)/gm;
@@ -29,11 +30,12 @@ enum fwAction {
 
 
 async function executeIPTables(args: string[]) {
+    const iptables_path = getConfig().iptables_command_name ?? iptables_fallback_path;
     logger.silly("Execute firewall command", { args, needSudo })
     if (needSudo) {
-        return await exec(sudo_path, [iptables_path, ...args])
+        return await exec(sudo_path, [iptables_fallback_path, ...args])
     } else {
-        return await exec(iptables_path, args)
+        return await exec(iptables_fallback_path, args)
     }
 }
 
@@ -81,12 +83,12 @@ async function forwardOperate(rule: fwRule, action: fwAction) {
 }
 
 async function addForward(rule: fwRule) {
-    logger.info("Adding forward", {rule})
+    logger.info("Adding forward", { rule })
     return forwardOperate(rule, fwAction.ADD)
 }
 
 async function delForward(rule: fwRule) {
-    logger.info("Removing forward", {rule})
+    logger.info("Removing forward", { rule })
     return forwardOperate(rule, fwAction.DEL)
 }
 
